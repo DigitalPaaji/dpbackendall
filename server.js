@@ -11,7 +11,7 @@ app.use(cors());
 app.use(express.json());
 
 app.get("/", async (req, res) => {
-  return res.json({ success: true, message: "site is running" });
+  return res.json({ success: true, message: "site is running......" });
 });
 
 app.use("/api/blogs", blogRoutes);
