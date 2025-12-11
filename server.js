@@ -4,11 +4,18 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const nodemailer = require("nodemailer");
 const blogRoutes = require("./routes/blogRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 const fetch = require("node-fetch");
-
+const  cookieParser = require("cookie-parser")
 const app = express();
-app.use(cors());
-app.use(express.json());
+app.use(cors({
+  origin: process.env.FRONTEND_URL,
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+})); 
+app.use(express.json()); 
+app.use(cookieParser()) 
 
 app.get("/", async (req, res) => {
   return res.json({ success: true, message: "site is running......" });
@@ -16,6 +23,8 @@ app.get("/", async (req, res) => {
 
 app.use("/api/blogs", blogRoutes);
 app.use("/api/contact", blogRoutes);
+app.use("/api/admin", adminRoutes);
+
 
 app.post("/paaji/send-mail", async (req, res) => {
   const {
@@ -396,10 +405,8 @@ app.post("/academy/send-mail", async (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-mongoose
-  .connect(process.env.MONGO_URI)
+mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log("MongoDB connected");
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-  })
-  .catch((err) => console.log(err));
+  }).catch((err) => console.log(err));
