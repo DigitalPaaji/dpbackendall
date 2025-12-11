@@ -92,13 +92,11 @@ const loginAdmin = async (req, res) => {
     );
 
     res.cookie("adminToken", token, {
-      path: "/",
+       path: "/",
       httpOnly: true,
-      secure: true,
-    //   sameSite: "none",
+      secure: process.env.WORK=="production"? true:false,
+      sameSite: process.env.WORK=="production"? "none": "lax",
       expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 20),
-    
-sameSite: "lax",
     });
 
     return res.status(200).json({
