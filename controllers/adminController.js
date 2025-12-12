@@ -1,6 +1,8 @@
 const Admin = require("../models/adminModel");
 const {genSaltSync,hashSync ,compareSync}= require("bcrypt")
-const jwt = require("jsonwebtoken")
+const jwt = require("jsonwebtoken");
+const sendOtptranspoter = require("../helpers/sendotp");
+const Otp = require("../models/otpModel");
 const SECRET_KEY=`${process.env.SECRET_KEY}`;
 
 
@@ -140,4 +142,82 @@ const getAdmin = async(req,res)=>{
     
 }
 
-module.exports= {createAdmin,loginAdmin,logoutAdmin,getAdmin}
+const sendOtp = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if(!email){
+      return res.json({success:false,message:"enter email"})
+    }
+    const checkEmail = await Admin.findOne({ email });
+    if (!checkEmail) {
+      return res.status(404).json({success:false, msg: "Email not found" });
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000);
+
+    await Otp.deleteMany({ email });
+
+    await sendOtptranspoter(email, otp);
+
+    await Otp.create({ email, otp });
+
+    return res.json({success:true, msg: "OTP sent successfully" });
+
+  } catch (error) { 
+    console.error(error);
+    return res.status(500).json({success:false, msg: "Internal Server Error" });
+  }
+};
+
+const verifyotp = async (req, res) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+
+    const otpRecord = await Otp.findOne({ email });
+
+    if (!otpRecord) {
+      return res.status(400).json({ message: "OTP not found or expired" });
+    }
+
+
+    if (String(otpRecord.otp) !== String(otp)) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+
+    if (Date.now() - otpRecord.createdAt > 10 * 60 * 1000) {
+      return res.status(400).json({ message: "OTP expired" });
+    }
+
+    // Hash new password
+    const salt = genSaltSync(10);
+    const hashedPassword = hashSync(newPassword, salt);
+
+    // Update admin password
+    const admin = await Admin.findOne({ email });
+    if (!admin) {
+      return res.status(400).json({ message: "Admin not found" });
+    }
+
+    admin.password = hashedPassword;
+    await admin.save();
+
+    // Delete OTP after successful use
+    await Otp.deleteMany({ email });
+
+    return res.json({
+      success: true,
+      message: "Password reset successful",
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+
+
+
+module.exports= {createAdmin,loginAdmin,logoutAdmin,getAdmin,sendOtp,verifyotp}
