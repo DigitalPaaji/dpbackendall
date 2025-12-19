@@ -22,7 +22,6 @@ app.get("/", async (req, res) => {
 });
 
 app.use("/api/blogs", blogRoutes);
-app.use("/api/contact", blogRoutes);
 app.use("/api/admin", adminRoutes);
 
 
