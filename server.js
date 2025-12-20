@@ -9,7 +9,9 @@ const fetch = require("node-fetch");
 const  cookieParser = require("cookie-parser")
 const app = express();
 app.use(cors({
-  origin: process.env.FRONTEND_URL,
+  origin: [ process.env.FRONTEND_URL1,
+      process.env.FRONTEND_URL2,
+      process.env.FRONTEND_URL3],
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
