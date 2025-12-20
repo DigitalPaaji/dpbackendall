@@ -256,6 +256,10 @@ app.post("/paaji/send-mail", async (req, res) => {
   }
 });
 
+
+
+
+
 app.post("/academy/send-mail", async (req, res) => {
   const {
     name,
@@ -268,29 +272,35 @@ app.post("/academy/send-mail", async (req, res) => {
     recaptchaToken,
   } = req.body;
 
-
-
-
+  // =============================
+  // RECAPTCHA VERIFICATION
+  // =============================
   try {
-    const recaptchaResponse =  await axios.post(
+    const recaptchaResponse = await axios.post(
       "https://www.google.com/recaptcha/api/siteverify",
       new URLSearchParams({
         secret: process.env.RECAPTCHA_SECRET_KEY_ACADMEY,
         response: recaptchaToken,
       })
     );
-  if (!recaptchaResponse.data.success) {
-      return res.status(400).json({ error: "reCAPTCHA verification failed." });
+
+    if (!recaptchaResponse.data.success) {
+      return res.status(400).json({
+        error: "reCAPTCHA verification failed.",
+      });
     }
-
-
-    
   } catch (error) {
-    console.error("reCAPTCHA verification error:", error);
-    return res.status(500).json({ error: "Failed to verify reCAPTCHA." });
+    console.error("reCAPTCHA verification error:", error.message);
+    return res.status(500).json({
+      error: "Failed to verify reCAPTCHA.",
+    });
   }
-  // Proceed to send the email if reCAPTCHA is successful
+
+  // =============================
+  // EMAIL + WHATSAPP
+  // =============================
   try {
+    // Nodemailer Transport
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -299,157 +309,102 @@ app.post("/academy/send-mail", async (req, res) => {
       },
     });
 
-    // Email options
+    // Email Options
     const mailOptions = {
       from: `Digital Paaji Academy <${process.env.EMAIL}>`,
       to: process.env.receiverEMAIL,
       subject: `Digital Paaji Academy New Contact Form Submission from ${name}`,
       html: `
-    <div style="font-family: Arial, sans-serif; background: #FAF8EA; padding: 20px; margin: 0;">
-    
-    <!-- Card Wrapper -->
-    <div style="
-      max-width: 600px; 
-      background: #ffffff; 
-      margin: auto; 
-      padding: 20px; 
-      border-radius: 10px; 
-      border: 1px solid #e5e5e5;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+<div style="font-family: Arial, sans-serif; background: #FAF8EA; padding: 20px; margin: 0;">
+  <div style="
+    max-width: 600px;
+    background: #ffffff;
+    margin: auto;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #e5e5e5;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  ">
+
+    <h2 style="
+      text-align: center;
+      color: #B67032;
+      font-size: 22px;
+      margin-bottom: 20px;
     ">
+      New Contact Form Submission
+    </h2>
 
-      <!-- Title -->
-      <h2 style="
-        text-align: center; 
-        color: #B67032; 
-        font-size: 22px; 
-        margin-bottom: 20px;
-      ">
-        New Contact Form Submission
-      </h2>
+    <div style="margin-bottom:16px;">
+      <strong>Name:</strong>
+      <p style="background:#fafafa;padding:10px;border-radius:6px;">${name}</p>
+    </div>
 
-      <!-- Row -->
-      <div style="margin-bottom: 16px;">
-        <strong style="color:#333; font-size:15px;">Name:</strong>
-        <p style="
-          margin:6px 0 0 0; 
-          background:#fafafa;
-          padding:10px; 
-          border-radius:6px; 
-          color:#555;
-          word-wrap: break-word;
-          overflow-wrap: break-word;
-        ">${name}</p>
-      </div>
+    <div style="margin-bottom:16px;">
+      <strong>Email:</strong>
+      <p style="background:#fafafa;padding:10px;border-radius:6px;">
+        <a href="mailto:${email}" style="color:#B67032;text-decoration:none;">
+          ${email}
+        </a>
+      </p>
+    </div>
 
-      <div style="margin-bottom: 16px;">
-        <strong style="color:#333; font-size:15px;">Email:</strong>
-        <p style="
-          margin:6px 0 0 0; 
-          background:#fafafa;
-          padding:10px; 
-          border-radius:6px; 
-          color:#555;
-          word-wrap: break-word;
-          overflow-wrap: break-word;
-        ">
-          <a href="mailto:${email}" style="color:#B67032; text-decoration:none;">${email}</a>
-        </p>
-      </div>
+    <div style="margin-bottom:16px;">
+      <strong>Phone:</strong>
+      <p style="background:#fafafa;padding:10px;border-radius:6px;">${phone}</p>
+    </div>
 
-      <div style="margin-bottom: 16px;">
-        <strong style="color:#333; font-size:15px;">Phone:</strong>
-        <p style="
-          margin:6px 0 0 0; 
-          background:#fafafa;
-          padding:10px; 
-          border-radius:6px; 
-          color:#555;
-          word-wrap: break-word;
-          overflow-wrap: break-word;
-        ">${phone}</p>
-      </div>
+    <div style="margin-bottom:16px;">
+      <strong>Qualification:</strong>
+      <p style="background:#fafafa;padding:10px;border-radius:6px;">${qualification}</p>
+    </div>
 
-      <div style="margin-bottom: 16px;">
-        <strong style="color:#333; font-size:15px;">Qualification:</strong>
-        <p style="
-          margin:6px 0 0 0; 
-          background:#fafafa;
-          padding:10px; 
-          border-radius:6px; 
-          color:#555;
-          word-wrap: break-word;
-          overflow-wrap: break-word;
-        ">${qualification}</p>
-      </div>
+    <div style="margin-bottom:16px;">
+      <strong>Course:</strong>
+      <p style="background:#fafafa;padding:10px;border-radius:6px;">${interest}</p>
+    </div>
 
-      <div style="margin-bottom: 16px;">
-        <strong style="color:#333; font-size:15px;">Course:</strong>
-        <p style="
-          margin:6px 0 0 0; 
-          background:#fafafa;
-          padding:10px; 
-          border-radius:6px; 
-          color:#555;
-          word-wrap: break-word;
-          overflow-wrap: break-word;
-        ">${interest}</p>
-      </div>
+    <div style="margin-bottom:16px;">
+      <strong>Leads From:</strong>
+      <p style="background:#fafafa;padding:10px;border-radius:6px;">${hear}</p>
+    </div>
 
-      <div style="margin-bottom: 16px;">
-        <strong style="color:#333; font-size:15px;">Leads From:</strong>
-        <p style="
-          margin:6px 0 0 0; 
-          background:#fafafa;
-          padding:10px; 
-          border-radius:6px; 
-          color:#555;
-          word-wrap: break-word;
-          overflow-wrap: break-word;
-        ">${hear}</p>
-      </div>
+    <div style="margin-bottom:16px;">
+      <strong>Message:</strong>
+      <p style="background:#fafafa;padding:10px;border-radius:6px;white-space:pre-wrap;">
+        ${message}
+      </p>
+    </div>
 
-      <div style="margin-bottom: 16px;">
-        <strong style="color:#333; font-size:15px;">Message:</strong>
-        <p style="
-          margin:6px 0 0 0; 
-          background:#fafafa;
-          padding:10px; 
-          border-radius:6px; 
-          color:#555;
-          word-wrap: break-word;
-          overflow-wrap: break-word;
-          white-space: pre-wrap;
-        ">${message}</p>
-      </div>
-
-      <!-- Footer -->
-      <div style="text-align:center; margin-top:25px;">
-        <p style="color:#B67032; font-weight:bold; font-size:15px; margin:0;">Digital Paaji</p>
-        <p style="color:#999; font-size:12px; margin-top:4px;">Digital Paaji Academy • Patiala</p>
-      </div>
-
+    <div style="text-align:center;margin-top:25px;">
+      <p style="color:#B67032;font-weight:bold;margin:0;">Digital Paaji</p>
+      <p style="color:#999;font-size:12px;margin-top:4px;">
+        Digital Paaji Academy • Patiala
+      </p>
     </div>
 
   </div>
-`,
+</div>
+      `,
     };
 
-    // Send the email
+    // Send Email
     await transporter.sendMail(mailOptions);
 
-    // WhatsApp API Trigger
+    // =============================
+    // WHATSAPP API (AXIOS)
+    // =============================
     const whatsappUrl = "https://console.authkey.io/restapi/requestjson.php";
 
     const whatsappPayload = {
       country_code: "91",
-      mobile: phone, // Send message to the provided phone number
+      mobile: phone,
       wid: "7130",
       type: "interactive",
-      template_name: "academy", // Ensure correct template name
+      template_name: "academy",
       language: {
         policy: "deterministic",
-        code: "en", // Use the correct language code for your template
+        code: "en",
       },
       bodyValues: {
         1: name,
@@ -457,34 +412,43 @@ app.post("/academy/send-mail", async (req, res) => {
       },
     };
 
-    const whatsappResponse = await fetch(whatsappUrl, {
-      method: "POST",
-      headers: {
-        Authorization: "Basic 20b1a74e419f290e",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(whatsappPayload),
-    });
-
-    if (!whatsappResponse.ok) {
-      console.error(
-        "Failed to send WhatsApp message:",
-        whatsappResponse.statusText
+    try {
+      const whatsappResponse = await axios.post(
+        whatsappUrl,
+        whatsappPayload,
+        {
+          headers: {
+            Authorization: "Basic 20b1a74e419f290e",
+            "Content-Type": "application/json",
+          },
+        }
       );
-    } else {
-      console.log("WhatsApp message sent successfully!");
+
+    } catch (err) {
+      console.log(
+        "WhatsApp sending failed:",
+        err.response?.data || err.message
+      );
     }
 
-    res
-      .status(200)
-      .json({ message: "Your message has been sent successfully!" });
+    // Success Response
+    res.status(200).json({
+      message: "Your message has been sent successfully!",
+    });
+
   } catch (error) {
-    console.error("Error sending email or WhatsApp message:", error);
-    res
-      .status(500)
-      .json({ error: "Failed to send message. Please try again later." });
+    console.error("Email or WhatsApp error:", error.message);
+    res.status(500).json({
+      error: "Failed to send message. Please try again later.",
+    });
   }
 });
+
+
+
+
+
+
 
 const PORT = process.env.PORT || 5000;
 
