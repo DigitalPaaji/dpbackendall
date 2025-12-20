@@ -261,7 +261,6 @@ app.post("/paaji/send-mail", async (req, res) => {
 });
 
 app.post("/academy/send-mail", async (req, res) => {
-  console.log("Received form data:", req.body);
   const {
     name,
     email,
@@ -273,21 +272,23 @@ app.post("/academy/send-mail", async (req, res) => {
     recaptchaToken,
   } = req.body;
 
-  const secretKey = process.env.RECAPTCHA_SECRET_KEY;
-  const recaptchaUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${recaptchaToken}`;
+
+
 
   try {
-    const recaptchaResponse = await fetch(recaptchaUrl, {
-      method: "POST",
-    });
-    const recaptchaData = await recaptchaResponse.json();
-    const { success } = recaptchaData;
-
-    if (!success) {
-      return res.status(400).json({
-        error: "reCAPTCHA verification failed. Please try again.",
-      });
+    const recaptchaResponse =  await axios.post(
+      "https://www.google.com/recaptcha/api/siteverify",
+      new URLSearchParams({
+        secret: process.env.RECAPTCHA_SECRET_KEY,
+        response: recaptchaToken,
+      })
+    );
+  if (!recaptchaResponse.data.success) {
+      return res.status(400).json({ error: "reCAPTCHA verification failed." });
     }
+
+
+    
   } catch (error) {
     console.error("reCAPTCHA verification error:", error);
     return res.status(500).json({ error: "Failed to verify reCAPTCHA." });
@@ -440,7 +441,6 @@ app.post("/academy/send-mail", async (req, res) => {
 
     // Send the email
     await transporter.sendMail(mailOptions);
-    console.log("Email sent successfully!");
 
     // WhatsApp API Trigger
     const whatsappUrl = "https://console.authkey.io/restapi/requestjson.php";
