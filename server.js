@@ -47,7 +47,7 @@ app.post("/paaji/send-mail", async (req, res) => {
     const recaptchaResponse = await axios.post(
       "https://www.google.com/recaptcha/api/siteverify",
       new URLSearchParams({
-        secret: process.env.RECAPTCHA_SECRET_KEY,
+        secret: process.env.RECAPTCHA_SECRET_KEY_PAAJI,
         response: recaptchaToken,
       })
     );
@@ -275,7 +275,7 @@ app.post("/academy/send-mail", async (req, res) => {
     const recaptchaResponse =  await axios.post(
       "https://www.google.com/recaptcha/api/siteverify",
       new URLSearchParams({
-        secret: process.env.RECAPTCHA_SECRET_KEY,
+        secret: process.env.RECAPTCHA_SECRET_KEY_ACADMEY,
         response: recaptchaToken,
       })
     );
