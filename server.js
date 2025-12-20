@@ -72,51 +72,160 @@ app.post("/paaji/send-mail", async (req, res) => {
     await transporter.sendMail({
       from: `Digital Paaji <${process.env.EMAIL}>`,
       to: process.env.receiverEMAIL,
-      subject: `New Contact Form Submission from ${fname}`,
+      subject: `Digital Paaji New Contact Form Submission from ${fname}`,
       html: `
-     <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; word-wrap: break-word; overflow-wrap: break-word;">
-      <h2 style="color: #007bff; text-align: center; word-wrap: break-word;">New Contact Form Submission</h2>
-      <p style="font-size: 16px; word-wrap: break-word;">You have received a new message:</p>
-      <table style="width: 100%; border-collapse: collapse; word-wrap: break-word; overflow-wrap: break-word;">
-        <tr>
-          <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>First Name:</strong></td>
-          <td style="padding: 8px; border-bottom: 1px solid #ddd;">${fname}</td>
-        </tr>
-        <tr>
-          <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Last Name:</strong></td>
-          <td style="padding: 8px; border-bottom: 1px solid #ddd;">${lname}</td>
-        </tr>
-        <tr>
-          <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Email:</strong></td>
-          <td style="padding: 8px; border-bottom: 1px solid #ddd; word-break: break-all;"><a href="mailto:${email}" style="color: #007bff;">${email}</a></td>
-        </tr>
-        <tr>
-          <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Phone:</strong></td>
-          <td style="padding: 8px; border-bottom: 1px solid #ddd;">${phone}</td>
-        </tr>
-        <tr>
-          <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Company:</strong></td>
-          <td style="padding: 8px; border-bottom: 1px solid #ddd;">${company}</td>
-        </tr>
-        <tr>
-          <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Business:</strong></td>
-          <td style="padding: 8px; border-bottom: 1px solid #ddd;">${business}</td>
-        </tr>
-        <tr>
-          <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Website:</strong></td>
-          <td style="padding: 8px; border-bottom: 1px solid #ddd; word-break: break-all;"><a href="${website}" target="_blank" style="color: #007bff;">${website}</a></td>
-        </tr>
-        <tr>
-          <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Service:</strong></td>
-          <td style="padding: 8px; border-bottom: 1px solid #ddd;">${service}</td>
-        </tr>
-        <tr>
-          <td style="padding: 8px; border-bottom: 1px solid #ddd; vertical-align: top;"><strong>Message:</strong></td>
-          <td style="padding: 8px; border-bottom: 1px solid #ddd; word-wrap: break-word; overflow-wrap: break-word;">${message}</td>
-        </tr>
-      </table>
-      <p style="text-align: center; margin-top: 20px;"><strong>Digital Paaji</strong></p>
-    </div>`,
+    <div style="font-family: Arial, sans-serif; background: #FAF8EA; padding: 20px; margin: 0;">
+
+  <!-- Card Wrapper -->
+  <div style="
+    max-width: 600px;
+    background: #ffffff;
+    margin: auto;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #e5e5e5;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  ">
+
+    <!-- Title -->
+    <h2 style="
+      text-align: center;
+      color: #B67032;
+      font-size: 22px;
+      margin-bottom: 20px;
+    ">
+      New Contact Form Submission
+    </h2>
+
+    <!-- First Name -->
+    <div style="margin-bottom: 16px;">
+      <strong style="color:#333; font-size:15px;">First Name:</strong>
+      <p style="
+        margin:6px 0 0;
+        background:#fafafa;
+        padding:10px;
+        border-radius:6px;
+        color:#555;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+      ">${fname}</p>
+    </div>
+
+    <!-- Last Name -->
+    <div style="margin-bottom: 16px;">
+      <strong style="color:#333; font-size:15px;">Last Name:</strong>
+      <p style="
+        margin:6px 0 0;
+        background:#fafafa;
+        padding:10px;
+        border-radius:6px;
+        color:#555;
+      ">${lname}</p>
+    </div>
+
+    <!-- Email -->
+    <div style="margin-bottom: 16px;">
+      <strong style="color:#333; font-size:15px;">Email:</strong>
+      <p style="
+        margin:6px 0 0;
+        background:#fafafa;
+        padding:10px;
+        border-radius:6px;
+        word-break: break-all;
+      ">
+        <a href="mailto:${email}" style="color:#B67032; text-decoration:none;">
+          ${email}
+        </a>
+      </p>
+    </div>
+
+    <!-- Phone -->
+    <div style="margin-bottom: 16px;">
+      <strong style="color:#333; font-size:15px;">Phone:</strong>
+      <p style="
+        margin:6px 0 0;
+        background:#fafafa;
+        padding:10px;
+        border-radius:6px;
+      ">${phone}</p>
+    </div>
+
+    <!-- Company -->
+    <div style="margin-bottom: 16px;">
+      <strong style="color:#333; font-size:15px;">Company:</strong>
+      <p style="
+        margin:6px 0 0;
+        background:#fafafa;
+        padding:10px;
+        border-radius:6px;
+      ">${company}</p>
+    </div>
+
+    <!-- Business -->
+    <div style="margin-bottom: 16px;">
+      <strong style="color:#333; font-size:15px;">Business:</strong>
+      <p style="
+        margin:6px 0 0;
+        background:#fafafa;
+        padding:10px;
+        border-radius:6px;
+      ">${business}</p>
+    </div>
+
+    <!-- Website -->
+    <div style="margin-bottom: 16px;">
+      <strong style="color:#333; font-size:15px;">Website:</strong>
+      <p style="
+        margin:6px 0 0;
+        background:#fafafa;
+        padding:10px;
+        border-radius:6px;
+        word-break: break-all;
+      ">
+        <a href="${website}" target="_blank" style="color:#B67032; text-decoration:none;">
+          ${website}
+        </a>
+      </p>
+    </div>
+
+    <!-- Service -->
+    <div style="margin-bottom: 16px;">
+      <strong style="color:#333; font-size:15px;">Service:</strong>
+      <p style="
+        margin:6px 0 0;
+        background:#fafafa;
+        padding:10px;
+        border-radius:6px;
+      ">${service}</p>
+    </div>
+
+    <!-- Message -->
+    <div style="margin-bottom: 16px;">
+      <strong style="color:#333; font-size:15px;">Message:</strong>
+      <p style="
+        margin:6px 0 0;
+        background:#fafafa;
+        padding:10px;
+        border-radius:6px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+      ">${message}</p>
+    </div>
+
+    <!-- Footer -->
+    <div style="text-align:center; margin-top:25px;">
+      <p style="color:#B67032; font-weight:bold; font-size:15px; margin:0;">
+        Digital Paaji
+      </p>
+      <p style="color:#999; font-size:12px; margin-top:4px;">
+        Digital Marketing Agency • Patiala
+      </p>
+    </div>
+
+  </div>
+</div>
+`,
     });
 
     // ─────────── WHATSAPP ───────────
@@ -195,9 +304,9 @@ app.post("/academy/send-mail", async (req, res) => {
 
     // Email options
     const mailOptions = {
-      from: `Digital Paaji <${process.env.EMAIL}>`,
+      from: `Digital Paaji Academy <${process.env.EMAIL}>`,
       to: process.env.receiverEMAIL,
-      subject: `New Contact Form Submission from ${name}`,
+      subject: `Digital Paaji Academy New Contact Form Submission from ${name}`,
       html: `
     <div style="font-family: Arial, sans-serif; background: #FAF8EA; padding: 20px; margin: 0;">
     
@@ -320,7 +429,7 @@ app.post("/academy/send-mail", async (req, res) => {
       <!-- Footer -->
       <div style="text-align:center; margin-top:25px;">
         <p style="color:#B67032; font-weight:bold; font-size:15px; margin:0;">Digital Paaji</p>
-        <p style="color:#999; font-size:12px; margin-top:4px;">Digital Marketing Academy • Patiala</p>
+        <p style="color:#999; font-size:12px; margin-top:4px;">Digital Paaji Academy • Patiala</p>
       </div>
 
     </div>
