@@ -6,18 +6,24 @@ const nodemailer = require("nodemailer");
 const blogRoutes = require("./routes/blogRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const fetch = require("node-fetch");
-const  cookieParser = require("cookie-parser")
+const https = require("https");
+const cookieParser = require("cookie-parser");
+const axios = require("axios");
 const app = express();
-app.use(cors({
-  origin: [ process.env.FRONTEND_URL1,
+app.use(
+  cors({
+    origin: [
+      process.env.FRONTEND_URL1,
       process.env.FRONTEND_URL2,
-      process.env.FRONTEND_URL3,"*"],
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
-})); 
-app.use(express.json()); 
-app.use(cookieParser()) 
+      process.env.FRONTEND_URL3,
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
+app.use(express.json());
+app.use(cookieParser());
 
 app.get("/", async (req, res) => {
   return res.json({ success: true, message: "site is running......" });
@@ -25,7 +31,6 @@ app.get("/", async (req, res) => {
 
 app.use("/api/blogs", blogRoutes);
 app.use("/api/admin", adminRoutes);
-
 
 app.post("/paaji/send-mail", async (req, res) => {
   const {
@@ -41,31 +46,21 @@ app.post("/paaji/send-mail", async (req, res) => {
     recaptchaToken,
   } = req.body;
 
-  const secretKey = process.env.RECAPTCHA_SECRET_KEY;
-
   try {
-    const recaptchaResponse = await fetch(
+    // ─────────── reCAPTCHA VERIFY ───────────
+    const recaptchaResponse = await axios.post(
       "https://www.google.com/recaptcha/api/siteverify",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: `secret=${secretKey}&response=${recaptchaToken}`,
-      }
+      new URLSearchParams({
+        secret: process.env.RECAPTCHA_SECRET_KEY,
+        response: recaptchaToken,
+      })
     );
 
-    const recaptchaData = await recaptchaResponse.json();
-
-    if (!recaptchaData.success) {
-      return res.status(400).json({
-        error: "reCAPTCHA verification failed. Please try again.",
-      });
+    if (!recaptchaResponse.data.success) {
+      return res.status(400).json({ error: "reCAPTCHA verification failed." });
     }
-  } catch (error) {
-    return res.status(500).json({ error: "Failed to verify reCAPTCHA." });
-  }
 
-  try {
-    // EMAIL
+    // ─────────── EMAIL ───────────
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -79,7 +74,7 @@ app.post("/paaji/send-mail", async (req, res) => {
       to: process.env.receiverEMAIL,
       subject: `New Contact Form Submission from ${fname}`,
       html: `
-    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; word-wrap: break-word; overflow-wrap: break-word;">
+     <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; word-wrap: break-word; overflow-wrap: break-word;">
       <h2 style="color: #007bff; text-align: center; word-wrap: break-word;">New Contact Form Submission</h2>
       <p style="font-size: 16px; word-wrap: break-word;">You have received a new message:</p>
       <table style="width: 100%; border-collapse: collapse; word-wrap: break-word; overflow-wrap: break-word;">
@@ -121,54 +116,38 @@ app.post("/paaji/send-mail", async (req, res) => {
         </tr>
       </table>
       <p style="text-align: center; margin-top: 20px;"><strong>Digital Paaji</strong></p>
-    </div>
-  `,
+    </div>`,
     });
 
-    console.log("Email sent successfully!");
-
-    // WHATSAPP API (SSL DISABLED TEMPORARILY)
-    const https = require("https");
-    const agent = new https.Agent({ rejectUnauthorized: false });
-
-    const whatsappPayload = {
-      country_code: "91",
-      mobile: phone,
-      wid: "19455",
-      type: "interactive",
-      template_name: "paajiwebsite",
-      language: { policy: "deterministic", code: "en" },
-      bodyValues: { 1: fname },
-    };
-
-    const whatsappResponse = await fetch(
+    // ─────────── WHATSAPP ───────────
+    await axios.post(
       "https://console.authkey.io/restapi/requestjson.php",
       {
-        method: "POST",
-        agent,
+        country_code: "91",
+        mobile: phone,
+        wid: "19455",
+        type: "interactive",
+        template_name: "paajiwebsite",
+        language: { policy: "deterministic", code: "en" },
+        bodyValues: { 1: fname },
+      },
+      {
+        httpsAgent: new https.Agent({ rejectUnauthorized: false }),
         headers: {
           Authorization: `Basic ${process.env.AUTHKEY_API_KEY}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(whatsappPayload),
       }
     );
 
-    if (whatsappResponse.ok) {
-      console.log("WhatsApp message sent successfully!");
-    } else {
-      console.log("WhatsApp API failed:", whatsappResponse.statusText);
-    }
-
-    // ─────────── SEND FINAL RESPONSE (ONLY ONCE) ───────────
-    return res.status(200).json({
-      message: "Your message has been sent successfully!",
-    });
+    return res
+      .status(200)
+      .json({ message: "Your message has been sent successfully!" });
   } catch (error) {
-    console.error("Error sending email or WhatsApp message:", error);
-    return res.status(500).json({
-      error: "Failed to send message. Please try again later.",
-    });
+    console.error("Paaji Error:", error.message);
+    return res
+      .status(500)
+      .json({ error: "Failed to send message. Try again later." });
   }
 });
 
@@ -201,8 +180,6 @@ app.post("/academy/send-mail", async (req, res) => {
       });
     }
   } catch (error) {
-    // console.log("reCAPTCHA Response:", recaptchaData);
-
     console.error("reCAPTCHA verification error:", error);
     return res.status(500).json({ error: "Failed to verify reCAPTCHA." });
   }
@@ -222,7 +199,7 @@ app.post("/academy/send-mail", async (req, res) => {
       to: process.env.receiverEMAIL,
       subject: `New Contact Form Submission from ${name}`,
       html: `
-  <div style="font-family: Arial, sans-serif; background: #FAF8EA; padding: 20px; margin: 0;">
+    <div style="font-family: Arial, sans-serif; background: #FAF8EA; padding: 20px; margin: 0;">
     
     <!-- Card Wrapper -->
     <div style="
@@ -406,8 +383,10 @@ app.post("/academy/send-mail", async (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-mongoose.connect(process.env.MONGO_URI)
+mongoose
+  .connect(process.env.MONGO_URI)
   .then(() => {
     console.log("MongoDB connected");
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-  }).catch((err) => console.log(err));
+  })
+  .catch((err) => console.log(err));
