@@ -88,7 +88,6 @@ const createBlog = async (req, res) => {
     // Uploaded new images (from multer)
     const newImages = req.files?.map(file => file.filename) || [];
 
-    // Remove deleted images from existing images
     const filteredImages = existingImages.filter(
       img => !deleteImages.includes(img)
     );
