@@ -12,6 +12,7 @@ const {
   getService,
   getCity,
 } = require("../controllers/blogController");
+const  storage  = require("../helpers/saveImage");
 
 router.get("/", getBlogs);
 router.get("/company",getBlogsCompany)
@@ -27,8 +28,8 @@ router.get("/city/:service",getCity)
 
 
 // Admin routes
-router.post("/", createBlog);
-router.put("/:slug", updateBlog);
+router.post("/",storage.array("images",10), createBlog);
+router.put("/:slug",storage.array("newImages",10), updateBlog);
 router.delete("/:slug", deleteBlog);
 
 
