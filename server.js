@@ -13,12 +13,7 @@ const path = require("path");
 const app = express();
 app.use(
   cors({
-    origin: (origin, callback) => {
-      // allow requests with no origin (Postman, mobile apps)
-      if (!origin) return callback(null, true);
-
-      return callback(null, true); // allow ALL origins & ports
-    },
+    origin: ["*",process.env.FRONTEND_URL1],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,

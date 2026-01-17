@@ -136,8 +136,20 @@ const createBlog = async (req, res) => {
 // Delete blog
 const deleteBlog = async (req, res) => {
   try {
-    const blog = await Blog.findOneAndDelete({ slug: req.params.slug });
+    const blog = await Blog.findOne({ slug: req.params.slug });
+    
+
+  
     if (!blog) return res.status(404).json({ message: "Blog not found" });
+       await Promise.all(
+  blog.images.map(img => deleteImage(img))
+);
+
+await blog.deleteOne()
+  
+
+
+
     res.json({ message: "Blog deleted" });
   } catch (err) {
     res.status(500).json({ message: err.message });
