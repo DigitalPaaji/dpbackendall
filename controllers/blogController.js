@@ -185,8 +185,8 @@ const getSingleBlog = async (req, res) => {
         message: "Service and City are required",
       });
     }
-
-    const blog = await Blog.findOne({ service, city });
+const servicenew= service.split("-").join(" ")
+    const blog = await Blog.findOne({ service:servicenew, city });
 
     if (!blog) {
       return res.status(404).json({
