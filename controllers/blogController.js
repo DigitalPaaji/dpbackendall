@@ -136,7 +136,7 @@ const createBlog = async (req, res) => {
 // Delete blog
 const deleteBlog = async (req, res) => {
   try {
-    const blog = await Blog.findOne({ slug: req.params.slug });
+    const blog = await Blog.findById(req.params.slug );
     
 
   
