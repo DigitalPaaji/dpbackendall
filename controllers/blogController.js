@@ -175,18 +175,19 @@ const getBlogsacademy = async (req, res) => {
   }
 };
 
-const getSingleBlog = async (req, res) => {
-  try {
-    const { service, city } = req.params;
 
-    if (!service || !city) {
+const getSingleBlogBySlug = async (req, res) => {
+  try {
+    const { slug } = req.params;
+
+    if (!slug) {
       return res.status(400).json({
         success: false,
-        message: "Service and City are required",
+        message: "Slug is required",
       });
     }
-const servicenew= service.split("-").join(" ")
-    const blog = await Blog.findOne({ service:servicenew, city });
+
+    const blog = await Blog.findOne({ slug });
 
     if (!blog) {
       return res.status(404).json({
@@ -206,6 +207,40 @@ const servicenew= service.split("-").join(" ")
     });
   }
 };
+
+
+
+// const getSingleBlog = async (req, res) => {
+//   try {
+//     const { service, city } = req.params;
+
+//     if (!service || !city) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Service and City are required",
+//       });
+//     }
+// const servicenew= service.split("-").join(" ")
+//     const blog = await Blog.findOne({ service:servicenew, city });
+
+//     if (!blog) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Blog not found",
+//       });
+//     }
+
+//     return res.status(200).json({
+//       success: true,
+//       data: blog,
+//     });
+//   } catch (error) {
+//     return res.status(500).json({
+//       success: false,
+//       message: error.message,
+//     });
+//   }
+// };
 
 const getService = async (req, res) => {
   try {
@@ -227,20 +262,64 @@ const getService = async (req, res) => {
   }
 };
 
+// const getCity = async (req, res) => {
+//   try {
+//     const { service } = req.params;
+//     if (!service) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Service parameter is required",
+//       });
+//     }
+//     const cities = await Blog.distinct("city", { service });
+//     return res.status(200).json({
+//       success: true,
+//       message: "Cities fetched successfully",
+//       data: cities,
+//     });
+//   } catch (error) {
+//     console.error("Error fetching cities:", error);
+
+//     return res.status(500).json({
+//       success: false,
+//       message: "Internal server error",
+//       error: error.message,
+//     });
+//   }
+// };
+
 const getCity = async (req, res) => {
   try {
     const { service } = req.params;
+
     if (!service) {
       return res.status(400).json({
         success: false,
         message: "Service parameter is required",
       });
     }
-    const cities = await Blog.distinct("city", { service });
+
+    // Fetch city + slug
+    const blogs = await Blog.find(
+      { service },
+      { city: 1, slug: 1, _id: 0 }
+    );
+
+    // Remove duplicate cities
+    const uniqueCities = [];
+    const seen = new Set();
+
+    for (const item of blogs) {
+      if (!seen.has(item.city)) {
+        seen.add(item.city);
+        uniqueCities.push(item);
+      }
+    }
+
     return res.status(200).json({
       success: true,
       message: "Cities fetched successfully",
-      data: cities,
+      data: uniqueCities,
     });
   } catch (error) {
     console.error("Error fetching cities:", error);
@@ -253,15 +332,17 @@ const getCity = async (req, res) => {
   }
 };
 
+
 module.exports = {
   getBlogs,
+  getSingleBlogBySlug,
   getBlogBySlug,
   createBlog,
   updateBlog,
   deleteBlog,
   getBlogsCompany,
   getBlogsacademy,
-  getSingleBlog,
+  // getSingleBlog,
   getService,
   getCity,
 };

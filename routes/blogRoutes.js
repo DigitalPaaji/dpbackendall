@@ -8,9 +8,10 @@ const {
   deleteBlog,
   getBlogsCompany,
   getBlogsacademy,
-  getSingleBlog,
+  // getSingleBlog,
   getService,
   getCity,
+  getSingleBlogBySlug,
 } = require("../controllers/blogController");
 const  storage  = require("../helpers/saveImage");
 
@@ -19,7 +20,7 @@ router.get("/company",getBlogsCompany)
 router.get("/academy",getBlogsacademy)
 router.get("/single/:slug", getBlogBySlug);
 
-router.get('/get/:service/:city',getSingleBlog)
+router.get('/get/:slug',getSingleBlogBySlug)
 router.get("/service",getService)
 router.get("/city/:service",getCity)
 
