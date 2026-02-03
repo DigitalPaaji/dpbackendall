@@ -24,10 +24,6 @@ router.get('/get/:slug',getSingleBlogBySlug)
 router.get("/service",getService)
 router.get("/city/:service",getCity)
 
-
-
-
-
 // Admin routes
 router.post("/",storage.array("images",10), createBlog);
 router.put("/:slug",storage.array("newImages",10), updateBlog);
